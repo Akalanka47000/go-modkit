@@ -1,0 +1,12 @@
+pre-commit:
+  parallel: true
+  commands:
+    format:
+      run: npm run format && git add .
+    lint:
+      run: npm run lint && git add .
+
+commit-msg:
+  commands:
+    commitlint:
+      run: npx commitlint --edit --color
