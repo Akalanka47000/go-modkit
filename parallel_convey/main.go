@@ -2,6 +2,7 @@ package pc
 
 import (
 	"sync"
+	"testing"
 
 	"github.com/smartystreets/goconvey/convey"
 )
@@ -13,10 +14,12 @@ import (
 // `Convey` with the same arguments as `Convey`, but it will run in a
 // separate goroutine and will not block the main thread. The WaitGroup
 // can be used to wait for all tests to complete before exiting the program.
+// However, if you do not provide a *testing.T to `ParallelConvey` at the time of usage,
+// then you should provide it once at the time of instantiation.
 //
 // Example usage:
 //
-//	ParallelConvey, Wait := pc.New()
+//	ParallelConvey, Wait := pc.New(t)
 //
 //	ParallelConvey("Test 1", func() {
 //		// Test code here
@@ -27,10 +30,15 @@ import (
 //	})
 //
 //	Wait()
-func New() (func(...any), func()) {
+func New(t ...*testing.T) (func(...any), func()) {
 	wg := &sync.WaitGroup{}
 	return func(items ...any) {
 		wg.Add(1)
+		if len(items) > 1 && len(t) > 0 { // If *testing.T is provided, inject it into convey if not already present
+			if _, ok := items[1].(func()); ok {
+				items = append(items[:1], append([]any{t[0]}, items[1:]...)...)
+			}
+		}
 		go func() {
 			convey.Convey(items...)
 			wg.Done()
