@@ -1,4 +1,4 @@
-module akalanka47000/go-modkit/parallel_convey
+module github.com/akalanka47000/go-modkit/parallel_convey
 
 go 1.23
 
