@@ -27,13 +27,13 @@ import (
 //	})
 //
 //	Wait()
-func New() (func(), func(...any)) {
+func New() (func(...any), func()) {
 	wg := &sync.WaitGroup{}
-	return wg.Wait, func(items ...any) {
+	return func(items ...any) {
 		wg.Add(1)
 		go func() {
 			convey.Convey(items...)
 			wg.Done()
 		}()
-	}
+	}, wg.Wait
 }
