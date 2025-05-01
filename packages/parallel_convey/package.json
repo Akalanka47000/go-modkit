@@ -1,7 +1,0 @@
-{
-    "name": "parallel_convey",
-    "scripts": {
-        "format": "bash ../../scripts/format.sh",
-        "install": "bash ../../scripts/install.sh"
-    }
-}

@@ -2,7 +2,7 @@
   "name": "go-modkit",
   "private": true,
   "workspaces": [
-    "packages/*"
+    "parallel_convey"
   ],
   "scripts": {
     "format": "turbo run format",
