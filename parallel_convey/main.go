@@ -17,6 +17,8 @@ import (
 // However, if you do not provide a *testing.T to `ParallelConvey` at the time of usage,
 // then you should provide it once at the time of instantiation.
 //
+// !!WARNING: Using this will jumble up the test reporting on the console due to parallel execution (The ones with the ticks and crosses).
+//
 // Example usage:
 //
 //	ParallelConvey, Wait := pc.New(t)
