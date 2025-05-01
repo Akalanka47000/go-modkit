@@ -17,7 +17,7 @@
    <a aria-label="License" href="https://turborepo.com">
     <img alt="" src="https://img.shields.io/badge/Maintained%20with-Turbo-f700ff.svg?style=flat-square">
   </a>
-  <a aria-label="CI Release" href="https://github.com/akalanka47000/go-modkit/actions/workflows/tests.yml">
+  <a aria-label="CI Tests" href="https://github.com/akalanka47000/go-modkit/actions/workflows/tests.yml">
     <img alt="" src="https://github.com/akalanka47000/go-modkit/actions/workflows/tests.yml/badge.svg">
   </a>
 </p>
