@@ -2,7 +2,8 @@
   "name": "go-modkit",
   "private": true,
   "workspaces": [
-    "parallel_convey"
+    "parallel_convey",
+    "routing"
   ],
   "scripts": {
     "format": "turbo run format",
