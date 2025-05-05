@@ -1,6 +1,7 @@
 package pc
 
 import (
+	"os"
 	"sync"
 	"testing"
 
@@ -32,9 +33,18 @@ import (
 //	})
 //
 //	Wait()
+//
+// If you want to disable parallel execution, for example for debugging purposes,
+// you can set the environment variable PARALLEL_CONVEY to `false` before running the tests:
+// PARALLEL_CONVEY=false go test -v
+// This will make it behave like the original `Convey` function and run the tests sequentially.
 func New(t ...*testing.T) (func(...any), func()) {
 	wg := &sync.WaitGroup{}
 	return func(items ...any) {
+		if os.Getenv("PARALLEL_CONVEY") == "false" {
+			convey.Convey(items...)
+			return
+		}
 		wg.Add(1)
 		if len(items) > 1 && len(t) > 0 { // If *testing.T is provided, inject it into convey if not already present
 			if _, ok := items[1].(func()); ok {
