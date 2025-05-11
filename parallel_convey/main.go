@@ -52,8 +52,8 @@ func New(t ...*testing.T) (func(...any), func()) {
 			}
 		}
 		go func() {
+			defer wg.Done()
 			convey.Convey(items...)
-			wg.Done()
 		}()
 	}, wg.Wait
 }
