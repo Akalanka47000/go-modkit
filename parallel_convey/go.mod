@@ -1,6 +1,6 @@
 module github.com/akalanka47000/go-modkit/parallel_convey
 
-go 1.23
+go 1.21
 
 require github.com/smartystreets/goconvey v1.8.1
 
