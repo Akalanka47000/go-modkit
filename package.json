@@ -2,6 +2,7 @@
   "name": "go-modkit",
   "private": true,
   "workspaces": [
+    "enums",
     "parallel_convey",
     "routing"
   ],

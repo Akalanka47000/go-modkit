@@ -1,0 +1,9 @@
+{
+    "name": "enums",
+    "scripts": {
+        "format": "bash ../internal/scripts/format.sh",
+        "install": "bash ../internal/scripts/install.sh",
+        "lint": "bash ../internal/scripts/lint.sh",
+        "test": "bash ../internal/scripts/test.sh"
+    }
+}
