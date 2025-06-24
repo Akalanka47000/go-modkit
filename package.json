@@ -10,7 +10,8 @@
     "format": "turbo run format",
     "lint": "turbo run lint",
     "test": "turbo run test",
-    "prepare": "lefthook install"
+    "prepare": "lefthook install",
+    "postinstall": "turbo run install"
   },
   "devDependencies": {
     "@commitlint/cli": "17.4.2",

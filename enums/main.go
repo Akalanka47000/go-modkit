@@ -38,20 +38,14 @@ func New[V comparable, T any](value T, lowercase ...bool) enum[T, V] {
 	for k, v := range target {
 		if v == zero {
 			rv := reflect.ValueOf(&v).Elem()
-			if rv.Kind() == reflect.Struct && rv.NumField() > 0 {
-				enumTypeHolder := rv.Field(0)
-				if enumTypeHolder.Kind() == reflect.Struct && enumTypeHolder.NumField() > 0 {
-					rawValue := enumTypeHolder.Field(0)
-					if rawValue.CanSet() && rawValue.Kind() == reflect.String {
-						if len(lowercase) > 0 && lowercase[0] {
-							delete(target, k)
-							k = strings.ToLower(k)
-						}
-						rawValue.SetString(k)
-						v = rv.Interface().(V)
-						target[k] = v
-					}
+			if rv.CanSet() && rv.Kind() == reflect.String {
+				if len(lowercase) > 0 && lowercase[0] {
+					delete(target, k)
+					k = strings.ToLower(k)
 				}
+				rv.SetString(k)
+				v = rv.Interface().(V)
+				target[k] = v
 			}
 		}
 		e.values = append(e.values, target[k])

@@ -9,6 +9,9 @@
     },
     "test": {
       "dependsOn": []
+    },
+    "install": {
+      "dependsOn": []
     }
   }
 }
