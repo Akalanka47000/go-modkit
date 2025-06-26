@@ -1,0 +1,54 @@
+version: "2"
+linters:
+  default: all
+  disable:
+    - bodyclose
+    - containedctx
+    - cyclop
+    - depguard
+    - dogsled
+    - dupl
+    - errcheck
+    - errchkjson
+    - errorlint
+    - err113
+    - exhaustruct
+    - forbidigo
+    - forcetypeassert
+    - funlen
+    - godox
+    - gochecknoglobals
+    - gochecknoinits
+    - gocyclo
+    - gocognit
+    - godot
+    - gosec
+    - gomoddirectives
+    - iface
+    - ireturn
+    - maintidx
+    - mnd
+    - nestif
+    - nilerr
+    - nlreturn
+    - noctx
+    - nonamedreturns
+    - paralleltest
+    - perfsprint
+    - revive
+    - recvcheck
+    - tagalign
+    - tagliatelle
+    - testpackage
+    - thelper
+    - usetesting
+    - varnamelen
+    - wrapcheck
+    - wsl
+
+  settings:
+    lll:
+      line-length: 180
+    staticcheck:
+      checks:
+        - '-ST1001'
