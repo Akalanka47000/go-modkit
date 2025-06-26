@@ -11,7 +11,7 @@ import (
 )
 
 type Enum[V comparable] struct {
-	Values      []V // List of all value values for this enum
+	values      []V
 	reflectType reflect.Type
 }
 
@@ -49,7 +49,9 @@ func New[T any](value T, opts ...optionBuilder) T {
 				field.SetString(key)
 			}
 		}
-		re.FieldByName("Values").Set(reflect.Append(re.FieldByName("Values"), field))
+		valuesField := re.FieldByName("values")
+		unsafeValuesField := reflect.NewAt(valuesField.Type(), unsafe.Pointer(valuesField.UnsafeAddr())).Elem()
+		unsafeValuesField.Set(reflect.Append(unsafeValuesField, field))
 	}
 
 	reflectTypeField := re.FieldByName("reflectType")
@@ -61,15 +63,20 @@ func New[T any](value T, opts ...optionBuilder) T {
 	return value
 }
 
+// Returns a slice of all valid enum values.
+func (e Enum[V]) Values() []V {
+	return e.values
+}
+
 // Returns a boolean indicating whether the provided value is a valid enum value
 func (e Enum[V]) IsValid(value V) bool {
-	return slices.Contains(e.Values, value)
+	return slices.Contains(e.values, value)
 }
 
 // Returns an error if the provided value is not a valid enum value or otherwise returns nil
 func (e Enum[V]) Validate(value V) error {
 	if !e.IsValid(value) {
-		return fmt.Errorf("invalid value for type %s: %v. Valid values include: %v", strings.TrimSuffix(e.reflectType.Name(), "s"), value, e.Values)
+		return fmt.Errorf("invalid value for type %s: %v. Valid values include: %v", strings.TrimSuffix(e.reflectType.Name(), "s"), value, e.values)
 	}
 	return nil
 }
