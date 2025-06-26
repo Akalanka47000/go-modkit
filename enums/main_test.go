@@ -19,7 +19,7 @@ func TestStringEnum(t *testing.T) {
 
 		MealPreference := New(MealPreferences{})
 
-		So(MealPreference.Values, ShouldHaveLength, 2)
+		So(MealPreference.Values(), ShouldHaveLength, 2)
 
 		So(MealPreference.Veg, ShouldEqual, "Veg")
 		So(MealPreference.NonVeg, ShouldEqual, "NonVeg")
@@ -33,7 +33,7 @@ func TestStringEnum(t *testing.T) {
 
 			MealPreference := New(MealPreferences{}, Lowercase())
 
-			So(MealPreference.Values, ShouldHaveLength, 2)
+			So(MealPreference.Values(), ShouldHaveLength, 2)
 
 			So(MealPreference.Veg, ShouldEqual, "veg")
 			So(MealPreference.NonVeg, ShouldEqual, "nonveg")
@@ -48,10 +48,23 @@ func TestStringEnum(t *testing.T) {
 
 			MealPreference := New(MealPreferences{}, Uppercase())
 
-			So(MealPreference.Values, ShouldHaveLength, 2)
+			So(MealPreference.Values(), ShouldHaveLength, 2)
 
 			So(MealPreference.Veg, ShouldEqual, "VEG")
 			So(MealPreference.NonVeg, ShouldEqual, "NONVEG")
+		})
+
+		Convey("should infer values when used with a pure struct definition", func() {
+			MealPreference := New(struct {
+				String
+				Veg    string
+				NonVeg string
+			}{}, Lowercase())
+
+			So(MealPreference.Values(), ShouldHaveLength, 2)
+
+			So(MealPreference.Veg, ShouldEqual, "veg")
+			So(MealPreference.NonVeg, ShouldEqual, "nonveg")
 		})
 
 		Convey("should check if a value is valid", func() {
@@ -79,7 +92,7 @@ func TestStringEnum(t *testing.T) {
 			NonVeg: "Non-Vegetarian",
 		})
 
-		So(MealPreference.Values, ShouldHaveLength, 2)
+		So(MealPreference.Values(), ShouldHaveLength, 2)
 
 		So(MealPreference.Veg, ShouldEqual, "Vegetarian")
 		So(MealPreference.NonVeg, ShouldEqual, "Non-Vegetarian")
@@ -99,7 +112,7 @@ func TestIntEnum(t *testing.T) {
 
 		Status := New(Statuses{})
 
-		So(Status.Values, ShouldHaveLength, 3)
+		So(Status.Values(), ShouldHaveLength, 3)
 
 		So(Status.Pending, ShouldEqual, 0)
 		So(Status.Active, ShouldEqual, 0)
@@ -120,7 +133,7 @@ func TestIntEnum(t *testing.T) {
 			Closed:  3,
 		})
 
-		So(Status.Values, ShouldHaveLength, 3)
+		So(Status.Values(), ShouldHaveLength, 3)
 
 		So(Status.Pending, ShouldEqual, 1)
 		So(Status.Active, ShouldEqual, 2)
