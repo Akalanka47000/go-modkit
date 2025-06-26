@@ -15,23 +15,21 @@ type Enum[V comparable] struct {
 	reflectType reflect.Type
 }
 
-type String = Enum[string]
-type Int = Enum[int]
-type Int32 = Enum[int32]
-type Int64 = Enum[int64]
-type Float32 = Enum[float32]
-type Float64 = Enum[float64]
-type Bool = Enum[bool]
-
 // Create a new enum instance from a given struct.
 //
 // Optionally, you can pass in a boolean to indicate whether the enum values should be treated as lowercase strings if they are automatically derived from struct field names.
 // This is only applicable for string enums.
-func New[T any](value T, lowercase ...bool) T {
+func New[T any](value T, opts ...optionBuilder) T {
 	rv := reflect.ValueOf(&value)
 	re := rv.Elem()
 
-	for i := range re.NumField() {
+	var options options
+
+	for _, opt := range opts {
+		opt(&options)
+	}
+
+	for i := 0; i < re.NumField(); i++ {
 		field := re.Field(i)
 		if strings.HasPrefix(field.Type().Name(), "Enum[") {
 			continue
@@ -42,8 +40,11 @@ func New[T any](value T, lowercase ...bool) T {
 		if field.IsZero() {
 			if field.CanSet() && field.Kind() == reflect.String {
 				key := re.Type().Field(i).Name
-				if len(lowercase) > 0 && lowercase[0] {
+				if options.lowercase {
 					key = strings.ToLower(key)
+				}
+				if options.uppercase {
+					key = strings.ToUpper(key)
 				}
 				field.SetString(key)
 			}
