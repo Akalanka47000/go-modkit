@@ -3,83 +3,72 @@
 package enums
 
 import (
-	"encoding/json"
 	"fmt"
 	"reflect"
 	"slices"
 	"strings"
+	"unsafe"
 )
 
-type enum[T any, V comparable] struct {
-	Values      T
-	values      []V
+type Enum[V comparable] struct {
+	Values      []V // List of all value values for this enum
 	reflectType reflect.Type
 }
 
-// Create a new enum instance from a given struct. You must specifically pass in the type of the enum values (V) apart from your base type (T).
+type String = Enum[string]
+type Int = Enum[int]
+type Int32 = Enum[int32]
+type Int64 = Enum[int64]
+type Float32 = Enum[float32]
+type Float64 = Enum[float64]
+type Bool = Enum[bool]
+
+// Create a new enum instance from a given struct.
 //
 // Optionally, you can pass in a boolean to indicate whether the enum values should be treated as lowercase strings if they are automatically derived from struct field names.
 // This is only applicable for string enums.
-func New[V comparable, T any](value T, lowercase ...bool) enum[T, V] {
-	var e enum[T, V]
-	var zero V
-	var target map[string]V
+func New[T any](value T, lowercase ...bool) T {
+	rv := reflect.ValueOf(&value)
+	re := rv.Elem()
 
-	bytes, err := json.Marshal(value)
-	if err != nil {
-		panic(fmt.Errorf("failed to marshal enum values: %w", err))
-	}
-
-	err = json.Unmarshal(bytes, &target)
-	if err != nil {
-		panic(fmt.Errorf("failed to unmarshal enum values into map: %w", err))
-	}
-
-	for k, v := range target {
-		if v == zero {
-			rv := reflect.ValueOf(&v).Elem()
-			if rv.CanSet() && rv.Kind() == reflect.String {
+	for i := range re.NumField() {
+		field := re.Field(i)
+		if strings.HasPrefix(field.Type().Name(), "Enum[") {
+			continue
+		}
+		if field.Kind() == reflect.Ptr {
+			panic(fmt.Errorf("enum fields cannot be pointers. Please use a value type instead of a pointer for field %s", re.Type().Field(i).Name))
+		}
+		if field.IsZero() {
+			if field.CanSet() && field.Kind() == reflect.String {
+				key := re.Type().Field(i).Name
 				if len(lowercase) > 0 && lowercase[0] {
-					delete(target, k)
-					k = strings.ToLower(k)
+					key = strings.ToLower(key)
 				}
-				rv.SetString(k)
-				v = rv.Interface().(V)
-				target[k] = v
+				field.SetString(key)
 			}
 		}
-		e.values = append(e.values, target[k])
+		re.FieldByName("Values").Set(reflect.Append(re.FieldByName("Values"), field))
 	}
 
-	bytes, err = json.Marshal(target)
-	if err != nil {
-		panic(fmt.Errorf("failed to marshal enum values after processing: %w", err))
-	}
+	reflectTypeField := re.FieldByName("reflectType")
 
-	err = json.Unmarshal(bytes, &e.Values)
-	if err != nil {
-		panic(fmt.Errorf("failed to unmarshal enum values into values: %w", err))
-	}
+	reflect.NewAt(reflectTypeField.Type(), unsafe.Pointer(reflectTypeField.UnsafeAddr())).
+		Elem().
+		Set(reflect.ValueOf(reflect.TypeOf(value)))
 
-	e.reflectType = reflect.TypeOf(e.Values)
-
-	return e
-}
-
-// Returns all supported values of the enum as a slice
-func (e enum[T, V]) ListValues() []V {
-	return e.values
+	return value
 }
 
 // Returns a boolean indicating whether the provided value is a valid enum value
-func (e enum[T, V]) IsValid(value V) bool {
-	return slices.Contains(e.values, value)
+func (e Enum[V]) IsValid(value V) bool {
+	return slices.Contains(e.Values, value)
 }
 
 // Returns an error if the provided value is not a valid enum value or otherwise returns nil
-func (e enum[T, V]) Validate(value V) error {
+func (e Enum[V]) Validate(value V) error {
 	if !e.IsValid(value) {
-		return fmt.Errorf("invalid value for type %s: %v. Valid values include: %v", strings.TrimSuffix(e.reflectType.Name(), "s"), value, e.values)
+		return fmt.Errorf("invalid value for type %s: %v. Valid values include: %v", strings.TrimSuffix(e.reflectType.Name(), "s"), value, e.Values)
 	}
 	return nil
 }
