@@ -31,12 +31,27 @@ func TestStringEnum(t *testing.T) {
 				NonVeg string
 			}
 
-			MealPreference := New(MealPreferences{}, true)
+			MealPreference := New(MealPreferences{}, Lowercase())
 
 			So(MealPreference.Values, ShouldHaveLength, 2)
 
 			So(MealPreference.Veg, ShouldEqual, "veg")
 			So(MealPreference.NonVeg, ShouldEqual, "nonveg")
+		})
+
+		Convey("should infer lowercase values when used with the uppercase option", func() {
+			type MealPreferences struct {
+				String
+				Veg    string
+				NonVeg string
+			}
+
+			MealPreference := New(MealPreferences{}, Uppercase())
+
+			So(MealPreference.Values, ShouldHaveLength, 2)
+
+			So(MealPreference.Veg, ShouldEqual, "VEG")
+			So(MealPreference.NonVeg, ShouldEqual, "NONVEG")
 		})
 
 		Convey("should check if a value is valid", func() {
