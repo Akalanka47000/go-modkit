@@ -4,7 +4,8 @@
   "workspaces": [
     "enums",
     "parallel_convey",
-    "routing"
+    "routing",
+    "envconfig"
   ],
   "scripts": {
     "format": "turbo run format",
